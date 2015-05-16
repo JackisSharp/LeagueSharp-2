@@ -405,10 +405,52 @@ namespace HikiCarry
                             E.Cast(targetz);
                             
                         }
+                        else
+                        {
+                          foreach (
+                          var qPosition in
+                            GetPossibleQPositions()
+                            .OrderBy(qPosition => qPosition.Distance(target.ServerPosition)))
+                        {
+                              E.UpdateSourcePosition(qPosition, qPosition);
+                              targetPosition = E.GetPrediction(targetz).CastPosition;
+                              finalPosition = targetPosition.Extend(qPosition.ServerPosition, -pushDistance);
+                              if (finalPosition.IsWall())
+                              {
+                                Q.Cast(qPosition);
+                                if(Player.Distance(qPosition)<50)
+                                {
+                                  E.Cast(targetz);
+                                }
+                              }
+                        }
                     }
                 }
                
             // hikigaya normal combo finish
+        }
+        
+        private static IEnumerable<Vector3> GetPossibleQPositions()
+        {
+            var pointList = new List<Vector3>();
+
+            var j = 300;
+           
+            var offset = (int)(2 * Math.PI * j / 100);
+
+                for (var i = 0; i <= offset; i++)
+                {
+                    var angle = i * Math.PI * 2 / offset;
+                    var point = new Vector3((float)(ObjectManager.Player.Position.X + j * Math.Cos(angle)),
+                        (float)(ObjectManager.Player.Position.Y - j * Math.Sin(angle)),
+                        ObjectManager.Player.Position.Z);
+
+                    if (!NavMesh.GetCollisionFlags(point).HasFlag(CollisionFlags.Wall))
+                        pointList.Add(point);
+                }
+           
+
+            return pointList;
         }
         public  static void Harass()
         {
